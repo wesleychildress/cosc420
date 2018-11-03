@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python
 
 """
 mpirun -np 56 ./helloworld.py
