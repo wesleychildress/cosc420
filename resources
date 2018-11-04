@@ -9,3 +9,6 @@ https://people.sc.fsu.edu/~jburkardt/cpp_src/prime_mpi/prime_mpi.cpp
 
 mpicc hello.c -o hello
 mpirun -np 4 ./hello
+
+mpic++ random_mpi.cpp -o random_mpi
+mpirun -np 4 ./random_mpi
