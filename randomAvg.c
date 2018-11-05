@@ -46,6 +46,34 @@ int compute_parity(int *array, int num_elements) {
   return count;
 }
 
+// Finds if an element is a prime number or not
+int find_prime(int *array, int num_elements) {
+  int count = 0;
+  int i, k, n;
+  int flag = 0;
+
+  for(i = 0; i < num_elements; i++) {
+    n = array[i];
+    for(k = 2; k <= n/2; ++k) {
+      //Condition for non primes
+      if(n%k == 0) {
+        flag = 1;
+        break;
+      }
+    }
+    if (n == 1) {
+
+    }
+    else {
+      if(flag == 0){
+        count++;
+      }
+    }
+  }
+
+  return count;
+}
+
 int main(int argc, char** argv) {
 
   if (argc != 3) {
@@ -75,6 +103,7 @@ int main(int argc, char** argv) {
   }
 
 
+
   // For each process, create a buffer that will hold a subset of the entire
   // array
   int *sub_rand_nums = (int *)malloc(sizeof(int) * num_elements_per_proc);
@@ -89,6 +118,7 @@ int main(int argc, char** argv) {
   // Finds the parity of each sub-array
   // Problem is how to find if the the elements in the sub array are prime
   // and creating the frequency table
+  //printf("Im in the processors!");
   int sub_parity = compute_parity(sub_rand_nums, num_elements_per_proc);
 
   // Gather all partial averages down to the root process
@@ -99,16 +129,40 @@ int main(int argc, char** argv) {
   }
   MPI_Gather(&sub_parity, 1, MPI_INT, sub_paritys, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  // Now that we have all of the partial averages on the root, compute the
-  // total average of all numbers. Since we are assuming each process computed
-  // an average across an equal amount of elements, this computation will
-  // produce the correct answer.
-  if (world_rank == 0) {
-    //int avg = compute_avg(sub_avgs, world_size);
-    //printf("Avg of all elements is %d\n", avg);
 
-    int countParity = compute_parity(sub_paritys, world_size);
+  //Checks to see if the sub arrays are prime numbers or not.
+  MPI_Scatter(rand_nums, num_elements_per_proc, MPI_INT, sub_rand_nums,
+              num_elements_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
+
+  // Finds the parity of each sub-array
+  // Problem is how to find if the the elements in the sub array are prime
+  // and creating the frequency table
+  //printf("Im in the processors!");
+
+  // Finds if an element is a prime number
+  int sub_prime = find_prime(sub_rand_nums, num_elements_per_proc);
+
+  // Gather all partial averages down to the root process
+  int *sub_primes = NULL;
+  if (world_rank == 0) {
+    sub_primes = (int *)malloc(sizeof(int) * world_size);
+    assert(sub_primes != NULL);
+  }
+  MPI_Gather(&sub_prime, 1, MPI_INT, sub_primes, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+  if (world_rank == 0) {
+    int i, k;
+    int countParity = 0;
+    int countPrimes = 0;
+    for(i = 0; i < world_size; i++) {
+      countParity = countParity + sub_paritys[i];
+    }
     printf("Total count of even parity numbers %d\n", countParity);
+
+    for(i = 0; i < world_size; i++) {
+      countPrimes = countPrimes + sub_primes[i];
+    }
+    printf("Total count of prime numbers %d\n", countPrimes);
 
   }
 
@@ -117,6 +171,7 @@ int main(int argc, char** argv) {
     free(rand_nums);
     //free(sub_avgs);
     free(sub_paritys);
+    free(sub_primes);
   }
   free(sub_rand_nums);
 
