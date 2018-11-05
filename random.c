@@ -1,12 +1,5 @@
-// Author: Wes Kendall
-// Copyright 2012 www.mpitutorial.com
-// This code is provided freely with the tutorials on mpitutorial.com. Feel
-// free to modify it for your own use. Any distribution of the code must
-// either provide a link to www.mpitutorial.com or keep this header intact.
-//
-// Program that computes the average of an array of elements in parallel using
-// MPI_Scatter and MPI_Gather
-//
+/* random.c */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -37,7 +30,7 @@ int compute_avg(int *array, int num_elements) {
 
 // Finds if element has an even sub_parity
 int compute_parity(int *array, int num_elements) {
-  int count;
+  int count = 0;
   int i;
   for(i = 0; i < num_elements; i++) {
     if(array[i] % 2 == 0)
