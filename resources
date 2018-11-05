@@ -12,3 +12,6 @@ mpirun -np 4 ./hello
 
 mpic++ random_mpi.cpp -o random_mpi
 mpirun -np 4 ./random_mpi
+
+mpicc randomAvg.cpp -o randomAvg
+mpirun -np 4 ./randomAvg 2 1000
