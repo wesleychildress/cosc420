@@ -35,9 +35,18 @@ int compute_avg(int *array, int num_elements) {
   return sum / num_elements;
 }
 
+// Finds if element has an even sub_parity
+int compute_parity(int *array, int num_elements) {
+  int count;
+  int i;
+  for(i = 0; i < num_elements; i++) {
+    if(array[i] % 2 == 0)
+      count++;
+  }
+  return count;
+}
+
 int main(int argc, char** argv) {
-
-
 
   if (argc != 3) {
     fprintf(stderr, "Usage: avg num_elements_per_proc\n");
@@ -46,7 +55,7 @@ int main(int argc, char** argv) {
 
   int num_elements_per_proc = atoi(argv[1]);
   int range_limit = atoi(argv[2]);
-  
+
   // Seed the random number generator to get different results each time
   srand(time(NULL));
 
@@ -64,44 +73,50 @@ int main(int argc, char** argv) {
   if (world_rank == 0) {
     rand_nums = create_rand_nums(num_elements_per_proc * world_size, range_limit);
   }
+
+
   // For each process, create a buffer that will hold a subset of the entire
   // array
   int *sub_rand_nums = (int *)malloc(sizeof(int) * num_elements_per_proc);
   assert(sub_rand_nums != NULL);
+
 
   // Scatter the random numbers from the root process to all processes in
   // the MPI world
   MPI_Scatter(rand_nums, num_elements_per_proc, MPI_INT, sub_rand_nums,
               num_elements_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
 
-  // Compute the average of your subset
-  int sub_avg = compute_avg(sub_rand_nums, num_elements_per_proc);
+  // Finds the parity of each sub-array
+  // Problem is how to find if the the elements in the sub array are prime
+  // and creating the frequency table
+  int sub_parity = compute_parity(sub_rand_nums, num_elements_per_proc);
 
   // Gather all partial averages down to the root process
-  int *sub_avgs = NULL;
+  int *sub_paritys = NULL;
   if (world_rank == 0) {
-    sub_avgs = (int *)malloc(sizeof(int) * world_size);
-    assert(sub_avgs != NULL);
+    sub_paritys = (int *)malloc(sizeof(int) * world_size);
+    assert(sub_paritys != NULL);
   }
-  MPI_Gather(&sub_avg, 1, MPI_INT, sub_avgs, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Gather(&sub_parity, 1, MPI_INT, sub_paritys, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // Now that we have all of the partial averages on the root, compute the
   // total average of all numbers. Since we are assuming each process computed
   // an average across an equal amount of elements, this computation will
   // produce the correct answer.
   if (world_rank == 0) {
-    int avg = compute_avg(sub_avgs, world_size);
-    printf("Avg of all elements is %d\n", avg);
-    // Compute the average across the original data for comparison
-    int original_data_avg =
-      compute_avg(rand_nums, num_elements_per_proc * world_size);
-    printf("Avg computed across original data is %d\n", original_data_avg);
+    //int avg = compute_avg(sub_avgs, world_size);
+    //printf("Avg of all elements is %d\n", avg);
+
+    int countParity = compute_parity(sub_paritys, world_size);
+    printf("Total count of even parity numbers %d\n", countParity);
+
   }
 
   // Clean up
   if (world_rank == 0) {
     free(rand_nums);
-    free(sub_avgs);
+    //free(sub_avgs);
+    free(sub_paritys);
   }
   free(sub_rand_nums);
 
