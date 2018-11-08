@@ -53,10 +53,11 @@ int main (int argc, char *argv[])
     /***** Master task only ******/
     if (taskid == MASTER) //Initialize the array
     {
-
+        srand(time(0));
         for(i=0; i<ARRAYSIZE; i++)
         {
-            data[i] =  arc4random_uniform(10000);;
+            data[i] = rand()%1000+1;
+            //data[i] =  arc4random_uniform(10000);
         }
         /* Send each task its portion of the array - master keeps 1st part */
         offset = chunksize;
@@ -141,7 +142,6 @@ if (taskid > MASTER) {
     myparity = findParity(offset, chunksize, taskid);
     /* parity function */
     frequency(offset, chunksize, taskid);
-
     /* Send my results back to the master task */
     dest = MASTER;
     MPI_Send(&offset, 1, MPI_INT, dest, tag1, MPI_COMM_WORLD);
@@ -153,14 +153,10 @@ if (taskid > MASTER) {
     MPI_Reduce(&myparity, &parity, 1, MPI_FLOAT, MPI_SUM, MASTER, MPI_COMM_WORLD);
     MPI_Reduce(&myprime, &prime, 1, MPI_FLOAT, MPI_SUM, MASTER, MPI_COMM_WORLD);
 
-
   } /* end of non-master */
 
-
 MPI_Finalize();
-
 }   /* end of main */
-
 
 // Finds even parity numbers
 int findParity(int myoffset, int chunk, int myid)
