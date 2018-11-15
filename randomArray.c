@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
-#define  ARRAYSIZE	4000
+#define  ARRAYSIZE	3000
 #define  MASTER		0
 
 /* global */
@@ -97,12 +97,12 @@ int main (int argc, char *argv[])
         MPI_Reduce(&myparity, &parity, 1, MPI_FLOAT, MPI_SUM, MASTER, MPI_COMM_WORLD);
         MPI_Reduce(&myprime, &prime, 1, MPI_FLOAT, MPI_SUM, MASTER, MPI_COMM_WORLD);
         numPrime=prime/4000.0000;
-        printf("\nElements in array with requency > 1 : \n");
+        printf("\nElements in array with frequency > 1 : \n");
         for(i=0; i<ARRAYSIZE; i++)
         {
             if(freq[i]>1)
             {
-                printf("%-4d occurs %-d times\n", data[i], freq[i]);
+                printf("%-4d : %-d \n", data[i], freq[i]);
             }
         }
         if(prime<1)
