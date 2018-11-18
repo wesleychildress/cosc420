@@ -4,34 +4,42 @@
 #include <time.h>
 #include <math.h>
 
+
 struct vertex {
   float x;
   float y;
 };
 
-void randomInscribedTri(struct vertex *r, struct vertex *s ,struct vertex *t) {
+struct triangle {
+  struct vertex r;
+  struct vertex s;
+  struct vertex t;
+};
 
-  r->x = 0;
-  r->y = 2 * ((float)rand()/(float)RAND_MAX);
+void randomInscribedTri(struct triangle *A) {
 
-  t->x = (float)rand()/(float)RAND_MAX;
-  t->y = 0;
+  A->r.x = 0;
+  A->r.y = 2 * ((float)rand()/(float)RAND_MAX);
 
-  s->x = (float)rand()/(float)RAND_MAX;
-  s->y = ((-2 * s->x) + 2);
+  A->t.x = (float)rand()/(float)RAND_MAX;
+  A->t.y = 0;
+
+  A->s.x = (float)rand()/(float)RAND_MAX;
+  A->s.y = ((-2 * A->s.x) + 2);
 
 }
 
-void printStruct(struct vertex r,struct vertex s,struct vertex t) {
-  printf("(%0.3f,%0.3f)\n",r.x, r.y);
-  printf("(%0.3f,%0.3f)\n",s.x, s.y);
-  printf("(%0.3f,%0.3f)\n",t.x, t.y);
+
+void printStruct(struct triangle A) {
+  printf("(%0.3f,%0.3f)\n",A.r.x, A.r.y);
+  printf("(%0.3f,%0.3f)\n",A.s.x, A.s.y);
+  printf("(%0.3f,%0.3f)\n",A.t.x, A.t.y);
 }
 
-float calculateArea(struct vertex r, struct vertex s, struct vertex t) {
+float calculateArea(struct triangle A) {
 
   float area;
-  area = fabsf((r.x * (s.y -t.y)) + (s.x * (t.y - r.y)) + (t.x * (r.y - s.y)));
+  area = fabsf((A.r.x * (A.s.y -A.t.y)) + (A.s.x * (A.t.y - A.r.y)) + (A.t.x * (A.r.y - A.s.y)));
 
   return area/2;
 }
@@ -39,19 +47,29 @@ float calculateArea(struct vertex r, struct vertex s, struct vertex t) {
 int main() {
 
   srand(time(NULL));
-  struct vertex r,s,t;
+  struct triangle A[5];
+  //struct vertex r,s,t;
   float area;
+  int i;
 
-  // Assigning random values for each vertices
-  randomInscribedTri(&r,&s,&t);
+  for(i = 0; i < 5; i++) {
 
-  // Printing the (x,y) coordinates of each vertice
-  printStruct(r,s,t);
+    // Assigning random values for each vertices
+    randomInscribedTri(&A[i]);
 
-  // Calculating the area using the coordinates of each vertice
-  area = calculateArea(r,s,t);
+    // Printing the (x,y) coordinates of each vertice
+    printStruct(A[i]);
 
-  printf("AREA: %0.3f\n", area);
+    // Calculating the area using the coordinates of each vertice
+    area = calculateArea(A[i]);
+
+    printf("AREA: %0.3f\n", area);
+
+    printf("-----------------------\n");
+
+  }
+
+
 
   return 0;
 }
