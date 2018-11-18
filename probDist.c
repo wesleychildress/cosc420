@@ -9,8 +9,23 @@ struct vertex {
   float y;
 };
 
-void printStruct(struct vertex vert) {
-  printf("(%0.3f,%0.3f)\n",vert.x, vert.y);
+void randomInscribedTri(struct vertex *r, struct vertex *s ,struct vertex *t) {
+
+  r->x = 0;
+  r->y = 2 * ((float)rand()/(float)RAND_MAX);
+
+  t->x = (float)rand()/(float)RAND_MAX;
+  t->y = 0;
+
+  s->x = (float)rand()/(float)RAND_MAX;
+  s->y = ((-2 * s->x) + 2);
+
+}
+
+void printStruct(struct vertex r,struct vertex s,struct vertex t) {
+  printf("(%0.3f,%0.3f)\n",r.x, r.y);
+  printf("(%0.3f,%0.3f)\n",s.x, s.y);
+  printf("(%0.3f,%0.3f)\n",t.x, t.y);
 }
 
 float calculateArea(struct vertex r, struct vertex s, struct vertex t) {
@@ -27,21 +42,13 @@ int main() {
   struct vertex r,s,t;
   float area;
 
-  float k = (float)rand()/(float)RAND_MAX;
+  // Assigning random values for each vertices
+  randomInscribedTri(&r,&s,&t);
 
-  r.x = 0;
-  r.y = 2 * ((float)rand()/(float)RAND_MAX);
+  // Printing the (x,y) coordinates of each vertice
+  printStruct(r,s,t);
 
-  t.x = (float)rand()/(float)RAND_MAX;
-  t.y = 0;
-
-  s.x = (float)rand()/(float)RAND_MAX;
-  s.y = ((-2 * s.x) + 2);
-
-  printStruct(r);
-  printStruct(s);
-  printStruct(t);
-
+  // Calculating the area using the coordinates of each vertice
   area = calculateArea(r,s,t);
 
   printf("AREA: %0.3f\n", area);
