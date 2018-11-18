@@ -76,6 +76,8 @@ int main(int argc, char** argv) {
 
   int num_elements_per_proc = atoi(argv[1]);
   int range_limit = atoi(argv[2]);
+  int freq[range_limit];
+  int i;
 
   // Seed the random number generator to get different results each time
   srand(time(NULL));
@@ -109,9 +111,6 @@ int main(int argc, char** argv) {
               num_elements_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
 
   // Finds the parity of each sub-array
-  // Problem is how to find if the the elements in the sub array are prime
-  // and creating the frequency table
-  //printf("Im in the processors!");
   int sub_parity = compute_parity(sub_rand_nums, num_elements_per_proc);
 
   // Gather all partial averages down to the root process
@@ -127,11 +126,6 @@ int main(int argc, char** argv) {
   MPI_Scatter(rand_nums, num_elements_per_proc, MPI_INT, sub_rand_nums,
               num_elements_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
 
-  // Finds the parity of each sub-array
-  // Problem is how to find if the the elements in the sub array are prime
-  // and creating the frequency table
-  //printf("Im in the processors!");
-
   // Finds if an element is a prime number
   int sub_prime = find_prime(sub_rand_nums, num_elements_per_proc);
 
@@ -142,6 +136,17 @@ int main(int argc, char** argv) {
     assert(sub_primes != NULL);
   }
   MPI_Gather(&sub_prime, 1, MPI_INT, sub_primes, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+  // Scatter the random numbers from the root process to all processes in
+  // the MPI world
+  MPI_Scatter(rand_nums, num_elements_per_proc, MPI_INT, sub_rand_nums,
+              num_elements_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
+
+  for(i = 0; i < num_elements_per_proc; i++) {
+    freq[sub_rand_nums[i]]++;
+  }
+
+  //MPI_Gather(&sub_parity, 1, MPI_INT, sub_paritys, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   if (world_rank == 0) {
     int i, k;
@@ -157,6 +162,9 @@ int main(int argc, char** argv) {
     }
     printf("Total count of prime numbers %d\n", countPrimes);
 
+    for(i = 0; i <= range_limit; i++) {
+      printf("%d: %d\n", i, freq[i]);
+    }
   }
 
   // Clean up
